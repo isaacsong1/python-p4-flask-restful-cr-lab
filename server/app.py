@@ -17,10 +17,32 @@ db.init_app(app)
 api = Api(app)
 
 class Plants(Resource):
-    pass
+    def get(self):
+        plant_list = [plant.to_dict() for plant in Plant.query.all()]
+        return plant_list, 200
+    
+    def post(self):
+        try:
+            data = request.get_json()
+
+            new_plant = Plant(**data)
+            db.session.add(new_plant)
+            db.session.commit()
+
+            return new_plant.to_dict(), 200
+        except Exception as e:
+            return {'error': str(e)}, 400
+
+
+
+api.add_resource(Plants, '/plants')
 
 class PlantByID(Resource):
-    pass
+    def get(self, id):
+        plant = Plant.query.filter(Plant.id == id).first().to_dict()
+        return plant, 200
+    
+api.add_resource(PlantByID, '/plants/<int:id>')
         
 
 if __name__ == '__main__':
